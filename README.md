@@ -2,7 +2,7 @@
 
 A robust and efficient distributed file storage system designed for secure file management, version control, and storage optimization.
 
-![Dashboard](https://neal-public-assets.s3.us-east-2.amazonaws.com/s/2026-02-11/b3c67537-88ab-4cc2-9842-880c85b5465e.png)
+![Dashboard](docs/dashboard.png)
 
 ## 🚀 Features
 
@@ -22,6 +22,22 @@ The application follows a standard **Controller-Service-Repository** layered arc
 2.  **Service Layer**: Contains business logic (Chunking, Hashing, Deduplication, Version Control).
 3.  **Repository Layer**: Interacts with the H2 database for metadata persistence.
 4.  **Storage Layer**: Physical storage of encrypted/hashed file chunks on the disk.
+
+### Architecture Diagram
+
+```mermaid
+graph TD
+    User[User] -->|Upload File| Controller[Controller Layer]
+    Controller -->|Process File| Service[Service Layer]
+    Service -->|Check Existence| Dedupe[Deduplication Service]
+    Dedupe -->|Bloom Filter| Bloom{Exists?}
+    Bloom -- No --> SaveChunk[Store Chunk on Disk]
+    Bloom -- Yes --> IncRef[Increment Ref Count]
+    SaveChunk --> SaveMeta[Save Metadata to DB]
+    IncRef --> SaveMeta
+    Service -->|Save Version| Repo[Repository Layer]
+    Repo -->|Persist| DB[(H2 Database)]
+```
 
 ## 🛠 Tech Stack
 
